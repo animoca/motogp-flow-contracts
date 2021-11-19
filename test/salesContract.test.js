@@ -189,7 +189,16 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
             console.log({e})
         }
     });
-
+/*
+    test("Change the status of the serial for the pack type", async () => {
+        const MotoGP = await getAccountAddress("MotoGP");
+        const packType = 3;
+        const serial = 1;
+        const value = true;
+        const tx = await sendTransaction("set-serial-status-in-pack-type-map", [MotoGP], [packType, serial, value]);
+        expect(tx.status).toBe(TX_SUCCESS_STATUS);
+    });
+*/
     const SKU_NAME_2 = "sku-2";
     let startTimeSku2;
     let endTimeSku2;
@@ -423,7 +432,23 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         let padded5 = await executeScript("test-address-padding",[ADDRESS_5]);
         expect(padded5).toBe(ADDRESS_5);
     });
+/*
+    test("withdraw flow from sales contract", async () => {
+        const MotoGP = await getAccountAddress("MotoGP");
+        const balanceBefore = parseFloat((await getFlowBalance(MotoGP)));
+        console.log({balanceBefore});
 
+        const amount = '2.0';
+
+        const tx = await sendTransaction("withdraw-flow-from-sales-contract", [MotoGP], [amount]);
+        expect(tx.status).toBe(TX_SUCCESS_STATUS);
+
+        const balanceAfter = parseFloat((await getFlowBalance(MotoGP)));
+        console.log({balanceAfter});
+        let diff = balanceAfter - balanceBefore;
+        expect(diff).toBe(parseFloat(amount));
+    });
+*/
     test("can change starttime timestamp on sku", async () => {
 
         const SKU_NAME_5 = "sku-5";
