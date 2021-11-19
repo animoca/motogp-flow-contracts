@@ -1,0 +1,2 @@
+export const TX_SUCCESS_STATUS = 4;
+export const EMULATOR_SERVICE_ACCOUNT_ADDRESS = "0xf8d6e0586b0a20c7";

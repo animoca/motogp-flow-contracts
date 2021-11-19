@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --runInBand"
   },
   "repository": {
     "type": "git",
@@ -15,5 +15,22 @@
   "bugs": {
     "url": "https://github.com/animoca/motogp-flow-contracts/issues"
   },
-  "homepage": "https://github.com/animoca/motogp-flow-contracts#readme"
+  "homepage": "https://github.com/animoca/motogp-flow-contracts#readme",
+  "dependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/preset-env": "^7.15.4",
+    "@onflow/rlp": "^0.0.3",
+    "@onflow/types": "^0.0.5",
+    "babel-jest": "^27.1.1",
+    "big-integer": "^1.6.50",
+    "bits.js": "^0.1.1",
+    "bn": "^1.0.5",
+    "elliptic": "^6.5.4",
+    "flow-js-testing": "^0.1.13",
+    "jest": "^27.1.1",
+    "lodash": "^4.17.21",
+    "nft.storage": "^4.0.0",
+    "np": "^7.5.0",
+    "sha3": "^2.1.4"
+  }
 }
