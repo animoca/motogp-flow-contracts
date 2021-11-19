@@ -137,7 +137,7 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
     test("Add SKU to SalesContract, and Read SKU data from SalesContract", async () => {
         const MotoGP = await getAccountAddress("MotoGP");
         const payoutAddress = MotoGP;
-        let startTime = Math.floor(Date.now() / 1000);
+        let startTime = Math.floor(Date.now() / 1000 - 86400);
         let packType = 3;
         let endTime = Math.floor((Date.now() / 1000) + 86400);
         let tx = await sendTransaction("add-sku-to-sales-contract", [MotoGP], [startTime, endTime, SKU_NAME, payoutAddress, packType]);
@@ -197,8 +197,8 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
     test("Add SKU to SalesContract", async () => {
         const MotoGP = await getAccountAddress("MotoGP");
         const payoutAddress = MotoGP;
-        startTimeSku2 = Math.floor(Date.now()/1000);
-        endTimeSku2 = Math.floor((Date.now()/1000) + 84600);
+        startTimeSku2 = Math.floor(Date.now() / 1000);
+        endTimeSku2 = Math.floor((Date.now() + 86400) / 1000);
         const packType = 3;
         let tx = await sendTransaction("add-sku-to-sales-contract", [MotoGP], [startTimeSku2, endTimeSku2, SKU_NAME_2, payoutAddress, packType]);
         expect(tx.status).toBe(TX_SUCCESS_STATUS);
@@ -301,16 +301,24 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         const MotoGP = await getAccountAddress("MotoGP");
         const Bob = await getAccountAddress("Bob");
         let bobBalanceBefore = await getFlowBalance(Bob);
-        let payoutBalanceBefore = await getSalesContractFlowBalance();
-        console.log({ payoutBalanceBefore })
+        let payoutBalanceBefore = await getFlowBalance(MotoGP);
+        console.log({ payoutBalanceBefore });
+
+        let motogpBalanceBefore = await getFlowBalance(MotoGP);
+        console.log({ motogpBalanceBefore });
+
         let bobsPackCount = await executeScript("get-owned-packs", [Bob]);
         expect(bobsPackCount.length).toBe(0);
         const packType = 3;
         await buyFromContract("Bob", 1, packType);
+
+        let motogpBalanceAfter = await getFlowBalance(MotoGP);
+        console.log({ motogpBalanceAfter });
+
         bobsPackCount = await executeScript("get-owned-packs", [Bob]);
         expect(bobsPackCount.length).toBe(1);
         console.log("bob's owned packs", bobsPackCount)
-        let payoutBalanceAfter = await getSalesContractFlowBalance();
+        let payoutBalanceAfter = await getFlowBalance(MotoGP);
         console.log({ payoutBalanceAfter })
         let bobBalanceAfter = await getFlowBalance(Bob);
         let diffPayoutVault = parseFloat(payoutBalanceAfter).toFixed(2) - parseFloat(payoutBalanceBefore).toFixed(2);
@@ -390,21 +398,30 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         expect(allSkuNamesBefore.length - allSkuNamesAfter.length).toBe(1)
     });
 
+    test("test padding logic", async () => {
+        let ADDRESS_0 = "0x252c7419f2282991";
+        let padded0 = await executeScript("test-address-padding",[ADDRESS_0]);
+        expect(padded0).toBe(ADDRESS_0);
 
-    test("withdraw flow from sales contract", async () => {
-        const MotoGP = await getAccountAddress("MotoGP");
-        const balanceBefore = parseFloat((await getFlowBalance(MotoGP)));
-        console.log({balanceBefore});
+        let ADDRESS_1 = "0x052c7419f2282991";
+        let padded1 = await executeScript("test-address-padding",[ADDRESS_1]);
+        expect(padded1).toBe(ADDRESS_1);
 
-        const amount = '2.0';
+        let ADDRESS_2 = "0x002c7419f2282991";
+        let padded2 = await executeScript("test-address-padding",[ADDRESS_2]);
+        expect(padded2).toBe(ADDRESS_2);
 
-        const tx = await sendTransaction("withdraw-flow-from-sales-contract", [MotoGP], [amount]);
-        expect(tx.status).toBe(TX_SUCCESS_STATUS);
+        let ADDRESS_3 = "0x000c7419f2282991";
+        let padded3 = await executeScript("test-address-padding",[ADDRESS_3]);
+        expect(padded3).toBe(ADDRESS_3);
 
-        const balanceAfter = parseFloat((await getFlowBalance(MotoGP)));
-        console.log({balanceAfter});
-        let diff = balanceAfter - balanceBefore;
-        expect(diff).toBe(parseFloat(amount));
+        let ADDRESS_4 = "0x00007419f2282991";
+        let padded4 = await executeScript("test-address-padding",[ADDRESS_4]);
+        expect(padded4).toBe(ADDRESS_4);
+
+        let ADDRESS_5 = "0x00000419f2282991"
+        let padded5 = await executeScript("test-address-padding",[ADDRESS_5]);
+        expect(padded5).toBe(ADDRESS_5);
     });
 
     test("can change starttime timestamp on sku", async () => {
@@ -466,11 +483,11 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         console.log({tsAfter});
         expect(newEndTime).toBe(tsAfter);
     });
-/*
+
     test("test that remove admin tx works", async () => {
         let MotoGP = await getAccountAddress("MotoGP");
         let tx = await sendTransaction("remove-sales-contract-admin", [MotoGP]); 
         expect(tx.status).toBe(TX_SUCCESS_STATUS);
     });
-*/
+
 });

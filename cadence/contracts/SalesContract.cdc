@@ -5,6 +5,24 @@ import FlowToken from 0xFlowToken
 import FungibleToken from 0xFungibleToken
 import MotoGPTransfer from 0xMotoGPTransfer
 
+// The SalesContract role is to enable on-chain sales of MotoGP packs.
+// Users buy directly from the buyPack method and get the pack deposited into their collection, if all conditions are met.
+// The contract admin manages sales by adding SKUs to the contract. A SKU is equivalent to a drop.
+//
+// Each SKU has a list of serial numbers (equivalent to print numbers), and when the user buys a pack, a serial is selected from the SKUs serial list,
+// and removed from the list. To make the serial selection hard to predict (pseuo-random) we employ a logic discussed further below.
+//
+// The buyPack method takes a signature as one of its arguments. This signature is generated when the user requests to buy a pack via the MotoGP web site. 
+// The user calls the MotoGP backend signing service. Using a private key, the signing service creates a signature which includes the user's address, a nonce unique to the address which is read from the SalesContract, and the pack type.
+// The signing service then sends the signature back to user the user, who then send a transaction including the signature to the SalesContract to buy pack.
+// Inside the buyPack method, the signature is verifying using a public key which is a field on the contract, and that only the admin can set. 
+// The key is set on the contract, rather than the account, to ensure it is only used for this contract.
+//
+// After the signature has been verified, the first byte is read from the signature and an index is created from it, which is used to 
+// select a serial from the serial list. That serial is then removed, and a pack is minted and deposited into the users collection.
+//
+// The user's payment for packs comes from a Flow vault submitted in the buyPack transaction. The payment is deposited into a Flow vault at an address set on the SKU.
+//
 pub contract SalesContract {
 
     pub fun getVersion(): String {
@@ -15,7 +33,6 @@ pub contract SalesContract {
     access(contract) let skuMap: {String : SKU}
     access(contract) let nonceMap: {Address : UInt64}
     access(contract) var verificationKey: String
-    access(self) var flowVault: @FlowToken.Vault
     access(contract) let serialMap: { UInt64 : { UInt64 : Bool}} // { packType : { serial: true/false } 
 
     pub struct SKU {
@@ -233,6 +250,8 @@ pub contract SalesContract {
             paymentVaultRef.balance == before(paymentVaultRef.balance) - self.skuMap[skuName]!.price : "Decrease in buyer vault balance doesn't match the price"
         }
 
+        let sku = self.skuMap[skuName]!
+
         let recipientStr = self.convertAddressToString(address: recipient)
 
         let message = skuName.concat(recipientStr).concat(nonce.toString()).concat(packType.toString());
@@ -241,9 +260,14 @@ pub contract SalesContract {
             panic("Signature isn't valid");
         }
 
-        let payment <- paymentVaultRef.withdraw(amount: self.skuMap[skuName]!.price) // Will panic if not enough $
+        let payment <- paymentVaultRef.withdraw(amount: sku.price) // Will panic if not enough $
         let vault <- payment as! @FlowToken.Vault // Will panic if can't be cast
-        SalesContract.flowVault.deposit(from: <- vault)
+
+        let payoutRecipient = getAccount(sku.payoutAddress)
+        let payoutReceiver = payoutRecipient.getCapability(/public/flowTokenReceiver)
+                            .borrow<&FlowToken.Vault{FungibleToken.Receiver}>()
+                            ?? panic("Could not borrow a reference to the payout receiver")
+        payoutReceiver.deposit(from: <-vault)
 
         if self.nonceMap.containsKey(recipient) {
             let oldNonce: UInt64 = self.nonceMap[recipient]!
@@ -263,17 +287,17 @@ pub contract SalesContract {
         var index = UInt64(signature.decodeHex()[0]!)
         
         // Ensure the index falls within the serial list
-        index = index % UInt64(self.skuMap[skuName]!.serialList.length)
+        index = index % UInt64(sku.serialList.length)
 
         // **Remove** the selected packNumber from the packNumber list.
         // By removing the item, we ensure that even if same index is selected again in next tx, it will refer to another item.
-        let packNumber = self.skuMap[skuName]!.serialList.remove(at: index);
+        let packNumber = sku.serialList.remove(at: index);
 
         // Mint a pack
         let nft <- MotoGPPack.createPack(packNumber: packNumber, packType: packType);
 
         // Update recipient's buy-count
-        let sku = self.skuMap[skuName]!
+       
         if sku.buyerCountMap.containsKey(recipient) {
             let oldCount = sku.buyerCountMap[recipient]!
             sku.buyerCountMap[recipient] = UInt64(oldCount) + UInt64(1)
@@ -366,17 +390,6 @@ pub contract SalesContract {
         return self.skuMap[name]!
     }
 
-    pub fun withdrawFlow(adminRef: &Admin, amount: UFix64): @FungibleToken.Vault{
-        pre {
-            adminRef != nil: "adminRef is nil"
-        }
-        return <- self.flowVault.withdraw(amount: amount)
-    }
-
-    pub fun getFlowVaultBalance(): UFix64 {
-        return self.flowVault.balance
-    }
-
     pub fun getVerificationKey(): String {
         return self.verificationKey
     }
@@ -388,6 +401,5 @@ pub contract SalesContract {
         self.skuMap = {}
         self.nonceMap = {}
         self.serialMap = {}
-        self.flowVault <- FlowToken.createEmptyVault() as! @FlowToken.Vault
     }
 }
