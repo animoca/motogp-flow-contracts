@@ -29,22 +29,40 @@ pub contract SalesContract {
         return "0.1.8"
     }
 
+
     pub let adminStoragePath: StoragePath
     access(contract) let skuMap: {String : SKU}
+    
+    // account-specific nonce to prevent user's from submitting same transaction twice
     access(contract) let nonceMap: {Address : UInt64}
+    // the public key used to verify a buyPack signature
     access(contract) var verificationKey: String
+    // map to track if a serial has already been added for a pack type. A duplicate would throw an
+    // exception on mint in buyPack from the Pack contract.
     access(contract) let serialMap: { UInt64 : { UInt64 : Bool}} // { packType : { serial: true/false } 
 
+    // a SKU is a sale event
     pub struct SKU {
+        // Unix timestamp in seconds (not milliseconds) when the SKU starts
         access(contract) var startTime: UInt64;
+        // Unix timestamp in seconds (not milliseconds) when the SKU ends
         access(contract) var endTime: UInt64;
+        // max total number of NFTs which can be minted during this SKU
         access(contract) var totalSupply: UInt64;
+        // list of serials, from which one will be chosen and removes for each NFT mint.
         access(contract) var serialList: [UInt64]
+        // map to check a buyer doesn't buy more than allowed max from a SKU
         access(contract) let buyerCountMap: { Address: UInt64 }
+        // price of the NFT in FLOW tokens
         access(contract) var price: UFix64
+        // max number of NFTs the buyer can buy
         access(contract) var maxPerBuyer: UInt64
+        // address to deposit the payment to. Can be unique for each SKU.
         access(contract) var payoutAddress: Address
+        // packType + serial determines a unique Pack
         access(contract) var packType: UInt64
+
+        // SKU construction - enforces startTime, endTime, payoutAddress and packType
         init(startTime: UInt64, endTime: UInt64, payoutAddress: Address, packType: UInt64){
             self.startTime = startTime
             self.endTime = endTime 
@@ -56,6 +74,9 @@ pub contract SalesContract {
             self.payoutAddress = payoutAddress
             self.packType = packType
         }
+
+        // Setters for modifications after a SKU has been created.
+        // Access via contract helper methods, never directly on the SKU
 
         access(contract) fun setStartTime(startTime: UInt64) {
             self.startTime = startTime
@@ -76,6 +97,12 @@ pub contract SalesContract {
         access(contract) fun setPayoutAddress(payoutAddress: Address) {
             self.payoutAddress = payoutAddress
         }
+
+        // The increaseSupply() method adds lists of serial numbers to a SKU.
+        // Since a SKUs serial number list length can be several thousands,
+        // increaseSupply() may need to be called multiple times.
+        // Given that the combination type + serial needs to be unique for a mint (else Pack contract will panic),
+        // the increaseSupply() method will panic if a serial is submitted for a type that already has it registered.
 
         access(contract) fun increaseSupply(supplyList: [UInt64]){
             let oldTotalSupply = UInt64(self.serialList.length)
@@ -100,6 +127,10 @@ pub contract SalesContract {
             }
         }
     }
+
+    // isCurrencySKU returns true if a SKU's startTime is in the past and it's endTime in the future, based on getCurrentBlock's timestamp.
+    // This method should not be relied on for precise time requirements on front end, as getCurrentBlock().timestamp in a read method may be quite inaccurate.
+
     pub fun isCurrentSKU(name: String): Bool {
         let sku = self.skuMap[name]!
         let now = UInt64(getCurrentBlock().timestamp)
@@ -122,9 +153,14 @@ pub contract SalesContract {
         return self.skuMap[name]!.totalSupply
     }
 
+
+    // Remaining supply equals the length of the serialList, since even mint event removes a serial from the list.
+
     pub fun getRemainingSupplyForSKU(name: String): UInt64 {
         return UInt64(self.skuMap[name]!.serialList.length)
     }
+
+    // Helper method to check how many NFT an account has purchased for a particular SKU
 
     pub fun getBuyCountForAddress(skuName: String, recipient: Address): UInt64 {
         return self.skuMap[skuName]!.buyerCountMap[recipient] ?? UInt64(0)
@@ -137,6 +173,9 @@ pub contract SalesContract {
     pub fun getMaxPerBuyerForSKU(name: String): UInt64 {
         return self.skuMap[name]!.maxPerBuyer
     }
+
+    // Returns a list of SKUs where start time is in the past and the end time is in the future.
+    // Don't reply on it for precise time requirements.
 
     pub fun getActiveSKUs(): [String] {
         let activeSKUs:[String] = []
@@ -164,8 +203,10 @@ pub contract SalesContract {
         self.skuMap.remove(key: skuName)
     }
 
+    // The Admin resource is used as an access lock on certain setter methods
     pub resource Admin {}
     
+    // Sets the public key used to verify signature submitted in the buyPack request
     pub fun setVerificationKey(adminRef: &Admin, verificationKey: String) {
         pre {
             adminRef != nil : "adminRef is nil."
@@ -173,6 +214,7 @@ pub contract SalesContract {
         self.verificationKey = verificationKey;
     }
 
+    // helper used by buyPack method to check if a signature is valid
     access(contract) fun isValidSignature(signature: String, message: String): Bool {
         
         let pk = PublicKey(
@@ -188,7 +230,8 @@ pub contract SalesContract {
         )
         return isValid
     }
-    
+
+    // Returns a nonce per account
     pub fun getNonce(address: Address): UInt64 {
         return self.nonceMap[address] ?? 0 as UInt64
     }
@@ -203,6 +246,9 @@ pub contract SalesContract {
             }
             return false
     }
+
+    // Helper method to convert address to String (used for verificaton of signature in buyPack)
+    // public to allow testing
 
     pub fun convertAddressToString(address: Address): String {
         let EXPECTED_ADDRESS_LENGTH = 18

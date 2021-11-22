@@ -34,7 +34,7 @@ The buyPack method takes the signature as one of its arguments, as well as payme
 Inside the buyPack method, the signature is verifying using a public key which is a field on the contract, and that only the admin can set. 
 The key is set on the contract, rather than the account, to ensure it is only used for this contract.
 
-After the signature has been verified, the first byte is read from the signature and an index is created from it, which is used to select a serial from the serial list. That serial is then removed, and a pack is minted and deposited into the users collection.
+After the signature has been verified, the first byte is read from the signature and an index is created from it, which is used to select a serial from the serial list. That serial is then removed, and a pack is minted and deposited into the users collection. While not random, in the absence of onchain random number oracles on FLow, this appraoch makes it hard to predict what the next selected serial will be, while avoiding including the serial in the function's argument list (which could be changed by the user who submits the transaction).
 
 The user's payment for packs comes from a Flow vault submitted in the buyPack transaction. The payment is deposited into a Flow vault at an address set on the SKU.
 
