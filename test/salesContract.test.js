@@ -113,24 +113,10 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         return { signMessage };
     }
 
-    test("sign offchain with private key and verify on chain with public key in script", async () => {
-        const signature = await MockServer().signMessage(USER_DOMAIN_TAG_HEX + MESSAGE_HEX);
-        let verificationResult = await executeScript("verify-signature-text", [MESSAGE_HEX, signature]);
-        expect(verificationResult).toBe(true);
-    });
-
     test("set public key on sales contract", async () => {
         const MotoGP = await getAccountAddress("MotoGP");
         const tx = await sendTransaction("set-public-key-in-sales-contract", [MotoGP],[PUBLIC_KEY]);
         expect(tx.status).toBe(TX_SUCCESS_STATUS);
-    });
-
-    test("sign offchain, verify onchain in script, with numeric input", async () => {
-        const MESSAGE_INT_ARRAY = [255]; // this should be the random number
-        const MESSAGE_HEX_FROM_INT_ARRAY = Buffer.from(MESSAGE_INT_ARRAY).toString("hex");
-        const signature = await MockServer().signMessage(USER_DOMAIN_TAG_HEX + MESSAGE_HEX_FROM_INT_ARRAY);
-        let verificationResult = await executeScript("verify-signature-numeric", [MESSAGE_HEX_FROM_INT_ARRAY, signature]);
-        expect(verificationResult).toBe(true);
     });
 
     const SKU_NAME = "sku-1";
