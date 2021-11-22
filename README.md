@@ -38,3 +38,8 @@ After the signature has been verified, the first byte is read from the signature
 
 The user's payment for packs comes from a Flow vault submitted in the buyPack transaction. The payment is deposited into a Flow vault at an address set on the SKU.
 
+## How Run Tests
+
+```
+yarn test salesContract
+```
