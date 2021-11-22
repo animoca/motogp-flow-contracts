@@ -440,10 +440,4 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         expect(newEndTime).toBe(tsAfter);
     });
 
-    test("test that remove admin tx works", async () => {
-        let MotoGP = await getAccountAddress("MotoGP");
-        let tx = await sendTransaction("remove-sales-contract-admin", [MotoGP]); 
-        expect(tx.status).toBe(TX_SUCCESS_STATUS);
-    });
-
 });
