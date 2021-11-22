@@ -7,7 +7,6 @@ import FungibleToken from 0xFungibleToken
 import FlowStorageFees from 0xFlowStorageFees
 import ContractVersion from 0xContractVersion
 import PackOpener from 0xPackOpener
-import Debug from 0xDebug
 
 // Contract for topping up an account's storage capacity when it receives a MotoGP pack or card
 //
@@ -68,7 +67,6 @@ pub contract MotoGPTransfer: ContractVersion {
     pub fun transferPackToPackOpenerCollection(pack: @MotoGPPack.NFT, toCollection: &PackOpener.Collection{PackOpener.IPackOpenerPublic}, toAddress: Address) {
         toCollection.deposit(token: <- pack)
         let toAccount = getAccount(toAddress)
-        Debug.Log(message: "capacity: ".concat(toAccount.storageCapacity.toString()).concat(" | used: ").concat(toAccount.storageUsed.toString()))
         self.topUp(toAddress)
     }
 

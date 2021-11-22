@@ -16,6 +16,29 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
     addressMap["FlowToken"] = "0x0ae53cb6e3f42a79";
     addressMap["FlowStorageFees"] = serviceAddress;
 
+    // Throw-away key pair only used for this test (created with "flow keys generate")
+    const PRIVATE_KEY = "2c4970e6cb10f2954c077bf5dd66dc419a5e6e42aa2e1651d1ba947187c985c2";
+    const PUBLIC_KEY = "31ebdd6c0b8280b9593c616335598437a09424a2b663ed742db499d179c9b170ef4aa83efc3ea0acc2fc9bae8a1a43070e90e7fe12db3b62f3a2b01a02f6c0ae";
+
+    const rightPaddedHexBuffer = (value, pad) => Buffer.from(value.padEnd(pad * 2, 0), "hex");
+    const USER_DOMAIN_TAG_HEX = rightPaddedHexBuffer(Buffer.from("FLOW-V0.0-user").toString("hex"), 32).toString("hex");
+
+    function MockServer() {
+        async function signMessage(msg) {
+            const ec = new EC("p256");
+            const key = ec.keyFromPrivate(Buffer.from(PRIVATE_KEY), "hex");
+            const sha = new SHA3(256);
+            sha.update(Buffer.from(msg, "hex"));
+            const digest = sha.digest();
+            const sig = key.sign(digest);
+            const n = 32;
+            const r = sig.r.toArrayLike(Buffer, "be", n);
+            const s = sig.s.toArrayLike(Buffer, "be", n);
+            return Buffer.concat([r, s]).toString("hex");
+        }
+        return { signMessage };
+    }
+
     beforeAll(async () => {
         const basePath = path.resolve(__dirname, "../cadence");
         const port = 8080;
@@ -56,7 +79,6 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
     test("Deploy MotoGPCardMetadata", async () => await deployContract({ contractName: "MotoGPCardMetadata", accountName: "MotoGP"}));
     test("Deploy MotoGPCard", async () => await deployContract({ contractName: "MotoGPCard", accountName: "MotoGP"}));
     test("Deploy PackOpener", async () => await deployContract({ contractName: "PackOpener", accountName: "MotoGP"}));
-    test("Deploy Debug", async () => await deployContract({ contractName: "Debug", accountName: "MotoGP"}));
     test("Deploy MotoGPTransfer", async () => await deployContract({ contractName: "MotoGPTransfer", accountName: "MotoGP"}));
     test("Deploy SalesContract", async () => await deployContract({ contractName: "SalesContract", accountName: "MotoGP" }));
 
@@ -86,32 +108,6 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         }
         await addAllPackTypes();
     });
-
-    // Throw-away key pair only used for this test (created with "flow keys generate")
-    const PRIVATE_KEY = "2c4970e6cb10f2954c077bf5dd66dc419a5e6e42aa2e1651d1ba947187c985c2";
-    const PUBLIC_KEY = "31ebdd6c0b8280b9593c616335598437a09424a2b663ed742db499d179c9b170ef4aa83efc3ea0acc2fc9bae8a1a43070e90e7fe12db3b62f3a2b01a02f6c0ae";
-
-    const rightPaddedHexBuffer = (value, pad) => Buffer.from(value.padEnd(pad * 2, 0), "hex");
-    const USER_DOMAIN_TAG_HEX = rightPaddedHexBuffer(Buffer.from("FLOW-V0.0-user").toString("hex"), 32).toString("hex");
- 
-    const MESSAGE = "FOO";
-    const MESSAGE_HEX = Buffer.from(MESSAGE).toString("hex");
-
-    function MockServer() {
-        async function signMessage(msg) {
-            const ec = new EC("p256");
-            const key = ec.keyFromPrivate(Buffer.from(PRIVATE_KEY), "hex");
-            const sha = new SHA3(256);
-            sha.update(Buffer.from(msg, "hex"));
-            const digest = sha.digest();
-            const sig = key.sign(digest);
-            const n = 32;
-            const r = sig.r.toArrayLike(Buffer, "be", n);
-            const s = sig.s.toArrayLike(Buffer, "be", n);
-            return Buffer.concat([r, s]).toString("hex");
-        }
-        return { signMessage };
-    }
 
     test("set public key on sales contract", async () => {
         const MotoGP = await getAccountAddress("MotoGP");
