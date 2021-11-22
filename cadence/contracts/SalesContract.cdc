@@ -27,7 +27,7 @@ import MotoGPTransfer from 0xMotoGPTransfer
 pub contract SalesContract {
 
     pub fun getVersion(): String {
-        return "0.1.8"
+        return "0.1.10"
     }
 
 
@@ -100,8 +100,8 @@ pub contract SalesContract {
         }
 
         // The increaseSupply() method adds lists of serial numbers to a SKU.
-        // Since a SKUs serial number list length can be several thousands,
-        // increaseSupply() may need to be called multiple times.
+        // Since a SKU's serial number list length can be several thousands,
+        // increaseSupply() may need to be called multiple times to build up a SKU's supply.
         // Given that the combination type + serial needs to be unique for a mint (else Pack contract will panic),
         // the increaseSupply() method will panic if a serial is submitted for a type that already has it registered.
 
