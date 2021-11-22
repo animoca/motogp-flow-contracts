@@ -87,6 +87,7 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         await addAllPackTypes();
     });
 
+    // Throw-away key pair only used for this test (created with "flow keys generate")
     const PRIVATE_KEY = "2c4970e6cb10f2954c077bf5dd66dc419a5e6e42aa2e1651d1ba947187c985c2";
     const PUBLIC_KEY = "31ebdd6c0b8280b9593c616335598437a09424a2b663ed742db499d179c9b170ef4aa83efc3ea0acc2fc9bae8a1a43070e90e7fe12db3b62f3a2b01a02f6c0ae";
 
@@ -160,7 +161,6 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
     }
 
     test("Add supply to SKU", async () => {
-        // add 6000 items
         let start = 1;
         let step = 60;
         for (let i = 0; i < 100; i++){
@@ -186,19 +186,10 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
             await addSupplyList([1], SKU_NAME);
             throw "Can add already-added serial to packtype!"
         } catch (e) {
-            console.log({e})
+            
         }
     });
-/*
-    test("Change the status of the serial for the pack type", async () => {
-        const MotoGP = await getAccountAddress("MotoGP");
-        const packType = 3;
-        const serial = 1;
-        const value = true;
-        const tx = await sendTransaction("set-serial-status-in-pack-type-map", [MotoGP], [packType, serial, value]);
-        expect(tx.status).toBe(TX_SUCCESS_STATUS);
-    });
-*/
+
     const SKU_NAME_2 = "sku-2";
     let startTimeSku2;
     let endTimeSku2;
@@ -239,13 +230,13 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
             let startTime = await executeScript("get-starttime-for-sku-in-sales-contract", ["wrong name"] );
             throw "Doesn't panic on wrong name: " + startTime
         } catch (e) {
-            // handle error object
+            
         }
         try {
             let endTime = await executeScript("get-endtime-for-sku-in-sales-contract", ["wrong name"] );
             throw "Doesn't panic on wrong name: " + endTime
         } catch (e) {
-            // handle error object
+            
         }
     });
 
@@ -300,48 +291,36 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         expect(buyCount).toBe(0);
     });
 
-    async function getSalesContractFlowBalance(){
-        let balance = await executeScript("get-sales-contract-flow-balance");
-        return balance;
-    }
-
     test("Buy from sales contract", async () => {
         const price = await executeScript("get-price-for-sku-in-sales-contract", [SKU_NAME]);
         const MotoGP = await getAccountAddress("MotoGP");
         const Bob = await getAccountAddress("Bob");
         let bobBalanceBefore = await getFlowBalance(Bob);
         let payoutBalanceBefore = await getFlowBalance(MotoGP);
-        console.log({ payoutBalanceBefore });
-
-        let motogpBalanceBefore = await getFlowBalance(MotoGP);
-        console.log({ motogpBalanceBefore });
 
         let bobsPackCount = await executeScript("get-owned-packs", [Bob]);
         expect(bobsPackCount.length).toBe(0);
         const packType = 3;
         await buyFromContract("Bob", 1, packType);
 
-        let motogpBalanceAfter = await getFlowBalance(MotoGP);
-        console.log({ motogpBalanceAfter });
-
         bobsPackCount = await executeScript("get-owned-packs", [Bob]);
         expect(bobsPackCount.length).toBe(1);
-        console.log("bob's owned packs", bobsPackCount)
+       
         let payoutBalanceAfter = await getFlowBalance(MotoGP);
-        console.log({ payoutBalanceAfter })
+       
         let bobBalanceAfter = await getFlowBalance(Bob);
         let diffPayoutVault = parseFloat(payoutBalanceAfter).toFixed(2) - parseFloat(payoutBalanceBefore).toFixed(2);
         expect(parseFloat(diffPayoutVault).toFixed(2)).toBe(parseFloat(price).toFixed(2));
         let diffBobVault = parseFloat(bobBalanceBefore).toFixed(2) - parseFloat(bobBalanceAfter).toFixed(2);
         expect(parseFloat(diffBobVault).toFixed(2)).toBe(parseFloat(price).toFixed(2));
         let packTypeInfo = await executeScript("get-pack-type-info", [packType]);
-        console.log({ packTypeInfo });
+        
         let assignedPackNumbers = packTypeInfo.assignedPackNumbers;
-        console.log({ assignedPackNumbers });
+        
         let serials = Object.keys(assignedPackNumbers)
-        console.log(`Minted serials for packType ${packType}`, serials);
+      
         let isMinted = await executeScript("is-serial-minted-for-pack-type", [packType, parseInt(serials[0])]);
-        console.log({ isMinted });
+        expect(isMinted).toBe(true);
     });
 
     test("get buy count for address from sales contract", async () => {
@@ -432,23 +411,7 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         let padded5 = await executeScript("test-address-padding",[ADDRESS_5]);
         expect(padded5).toBe(ADDRESS_5);
     });
-/*
-    test("withdraw flow from sales contract", async () => {
-        const MotoGP = await getAccountAddress("MotoGP");
-        const balanceBefore = parseFloat((await getFlowBalance(MotoGP)));
-        console.log({balanceBefore});
 
-        const amount = '2.0';
-
-        const tx = await sendTransaction("withdraw-flow-from-sales-contract", [MotoGP], [amount]);
-        expect(tx.status).toBe(TX_SUCCESS_STATUS);
-
-        const balanceAfter = parseFloat((await getFlowBalance(MotoGP)));
-        console.log({balanceAfter});
-        let diff = balanceAfter - balanceBefore;
-        expect(diff).toBe(parseFloat(amount));
-    });
-*/
     test("can change starttime timestamp on sku", async () => {
 
         const SKU_NAME_5 = "sku-5";
@@ -462,20 +425,13 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         let tx = await sendTransaction("add-sku-to-sales-contract", [MotoGP], [startTime, endTime, SKU_NAME_5, payoutAddress, packType]);
         expect(tx.status).toBe(TX_SUCCESS_STATUS);
 
-        // check ts
         let tsBefore = await executeScript("get-starttime-for-sku-in-sales-contract", [SKU_NAME_5]);
-        console.log({tsBefore});
-        // get ts before
         const newStartTime = tsBefore + 100;
-        console.log({newStartTime})
 
-        // tx
         const txChangeTs = await sendTransaction("set-starttime-on-sku-in-salescontract", [MotoGP], [SKU_NAME_5, newStartTime]);
         expect(txChangeTs.status).toBe(TX_SUCCESS_STATUS);
 
-        // get ts after
         let tsAfter = await executeScript("get-starttime-for-sku-in-sales-contract", [SKU_NAME_5]);
-        console.log({tsAfter});
         expect(newStartTime).toBe(tsAfter);
     });
 
@@ -492,20 +448,13 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         let tx = await sendTransaction("add-sku-to-sales-contract", [MotoGP], [startTime, endTime, SKU_NAME_5, payoutAddress, packType]);
         expect(tx.status).toBe(TX_SUCCESS_STATUS);
 
-        // check ts
         let tsBefore = await executeScript("get-endtime-for-sku-in-sales-contract", [SKU_NAME_5]);
-        console.log({tsBefore});
-        // get ts before
         const newEndTime = tsBefore + 100;
-        console.log({newStartTime: newEndTime})
 
-        // tx
         const txChangeTs = await sendTransaction("set-endtime-for-sku-in-salescontract", [MotoGP], [SKU_NAME_5, newEndTime]);
         expect(txChangeTs.status).toBe(TX_SUCCESS_STATUS);
 
-        // get ts after
         let tsAfter = await executeScript("get-endtime-for-sku-in-sales-contract", [SKU_NAME_5]);
-        console.log({tsAfter});
         expect(newEndTime).toBe(tsAfter);
     });
 
