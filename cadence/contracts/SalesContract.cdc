@@ -5,21 +5,22 @@ import FlowToken from 0xFlowToken
 import FungibleToken from 0xFungibleToken
 import MotoGPTransfer from 0xMotoGPTransfer
 
-// The SalesContract role is to enable on-chain sales of MotoGP packs.
+// The SalesContract's role is to enable on-chain sales of MotoGP packs.
 // Users buy directly from the buyPack method and get the pack deposited into their collection, if all conditions are met.
 // The contract admin manages sales by adding SKUs to the contract. A SKU is equivalent to a drop.
 //
 // Each SKU has a list of serial numbers (equivalent to print numbers), and when the user buys a pack, a serial is selected from the SKUs serial list,
-// and removed from the list. To make the serial selection hard to predict (pseuo-random) we employ a logic discussed further below.
+// and removed from the list. To make the serial selection hard to predict we employ a logic discussed further below.
 //
 // The buyPack method takes a signature as one of its arguments. This signature is generated when the user requests to buy a pack via the MotoGP web site. 
 // The user calls the MotoGP backend signing service. Using a private key, the signing service creates a signature which includes the user's address, a nonce unique to the address which is read from the SalesContract, and the pack type.
-// The signing service then sends the signature back to user the user, who then send a transaction including the signature to the SalesContract to buy pack.
-// Inside the buyPack method, the signature is verifying using a public key which is a field on the contract, and that only the admin can set. 
-// The key is set on the contract, rather than the account, to ensure it is only used for this contract.
+// The signing service then sends the signature back to user the user, who subsequently send a transaction including the signature to the SalesContract to buy a pack.
+// Inside the buyPack method, the signature is verified using a public key which is a string field on the contract, and that only the admin can set. 
+// The key is set on the contract, rather than the account, to guarantee it is only used within this contract.
 //
 // After the signature has been verified, the first byte is read from the signature and an index is created from it, which is used to 
-// select a serial from the serial list. That serial is then removed, and a pack is minted and deposited into the users collection.
+// select a serial from the serial list. That serial is then removed, and a pack is minted and deposited into the users collection. In this way,
+// for every pack purchase, the serial list shrinks by one.
 //
 // The user's payment for packs comes from a Flow vault submitted in the buyPack transaction. The payment is deposited into a Flow vault at an address set on the SKU.
 //
@@ -33,15 +34,15 @@ pub contract SalesContract {
     pub let adminStoragePath: StoragePath
     access(contract) let skuMap: {String : SKU}
     
-    // account-specific nonce to prevent user's from submitting same transaction twice
+    // account-specific nonce to prevent a user from submitting the same transaction twice
     access(contract) let nonceMap: {Address : UInt64}
     // the public key used to verify a buyPack signature
     access(contract) var verificationKey: String
     // map to track if a serial has already been added for a pack type. A duplicate would throw an
     // exception on mint in buyPack from the Pack contract.
-    access(contract) let serialMap: { UInt64 : { UInt64 : Bool}} // { packType : { serial: true/false } 
+    access(contract) let serialMap: { UInt64 : { UInt64 : Bool}} // Used like so : { packType : { serial: true/false } 
 
-    // a SKU is a sale event
+    // An SKU is equivalent to a drop or "sale event" with start and end time, and max supply
     pub struct SKU {
         // Unix timestamp in seconds (not milliseconds) when the SKU starts
         access(contract) var startTime: UInt64;
@@ -49,9 +50,9 @@ pub contract SalesContract {
         access(contract) var endTime: UInt64;
         // max total number of NFTs which can be minted during this SKU
         access(contract) var totalSupply: UInt64;
-        // list of serials, from which one will be chosen and removes for each NFT mint.
+        // list of serials, from which one will be chosen and removed for each NFT mint.
         access(contract) var serialList: [UInt64]
-        // map to check a buyer doesn't buy more than allowed max from a SKU
+        // map to check that a buyer doesn't buy more than allowed max from a SKU
         access(contract) let buyerCountMap: { Address: UInt64 }
         // price of the NFT in FLOW tokens
         access(contract) var price: UFix64
@@ -62,7 +63,7 @@ pub contract SalesContract {
         // packType + serial determines a unique Pack
         access(contract) var packType: UInt64
 
-        // SKU construction - enforces startTime, endTime, payoutAddress and packType
+        // SKU constructor
         init(startTime: UInt64, endTime: UInt64, payoutAddress: Address, packType: UInt64){
             self.startTime = startTime
             self.endTime = endTime 
@@ -306,15 +307,18 @@ pub contract SalesContract {
             panic("Signature isn't valid");
         }
 
+        // Withdraw payment from the vault ref
         let payment <- paymentVaultRef.withdraw(amount: sku.price) // Will panic if not enough $
         let vault <- payment as! @FlowToken.Vault // Will panic if can't be cast
 
+        // Get recipient vault and deposit payment
         let payoutRecipient = getAccount(sku.payoutAddress)
         let payoutReceiver = payoutRecipient.getCapability(/public/flowTokenReceiver)
                             .borrow<&FlowToken.Vault{FungibleToken.Receiver}>()
                             ?? panic("Could not borrow a reference to the payout receiver")
         payoutReceiver.deposit(from: <-vault)
 
+        // Check nonce for account isn't reused, and increment it
         if self.nonceMap.containsKey(recipient) {
             let oldNonce: UInt64 = self.nonceMap[recipient]!
             let baseMessage = "Nonce ".concat(nonce.toString()).concat(" for ").concat(recipient.toString())
@@ -353,13 +357,15 @@ pub contract SalesContract {
             self.skuMap[skuName] = sku
         }
 
-        // We deposit the purchased pack into a temporary collection, to be able to topup the buyer's Flow/storage using the MotoGPTransfer contract
+        // Deposit the purchased pack into a temporary collection, to be able to topup the buyer's Flow/storage using the MotoGPTransfer contract
         let tempCollection <- MotoGPPack.createEmptyCollection()
         tempCollection.deposit(token: <- nft); 
 
-        // We transfer the pack using the MotoGPTransfer contract, to do Flow/storage topup for recipient
+        // Transfer the pack using the MotoGPTransfer contract, to do Flow/storage topup for recipient
         MotoGPTransfer.transferPacks(fromCollection: <- tempCollection, toCollection: recipientCollectionRef, toAddress: recipient);    
     }
+
+    // Emergency-helper method to reset a serial in the map
 
     pub fun setSerialStatusInPackTypeMap(adminRef: &Admin, packType: UInt64, serial: UInt64, value: Bool) {
         pre {
@@ -370,6 +376,8 @@ pub contract SalesContract {
         }
     }
 
+    // Allow Admin to add a new SKU 
+
     pub fun addSKU(adminRef: &Admin, startTime: UInt64, endTime: UInt64, name: String, payoutAddress: Address, packType: UInt64) {
         pre {
             adminRef != nil : "adminRef is nil"
@@ -377,6 +385,8 @@ pub contract SalesContract {
         let sku = SKU(startTime: startTime, endTime: endTime, payoutAddress: payoutAddress, packType: packType);
         self.skuMap.insert(key: name, sku)
     }
+
+    // Add lists of serials to a SKU
 
     pub fun increaseSupplyForSKU(adminRef: &Admin, name: String, supplyList: [UInt64]) {
         pre {
@@ -443,6 +453,7 @@ pub contract SalesContract {
     init(){
         self.adminStoragePath = /storage/salesContractAdmin
         self.verificationKey = ""
+        // Crete Admin resource
         self.account.save(<- create Admin(), to: self.adminStoragePath)
         self.skuMap = {}
         self.nonceMap = {}

@@ -11,7 +11,7 @@ Each SKU has a list of serial numbers (equivalent to print numbers), and when th
 ## Pack buy logic
 
 ### 1
-On the MotoGP website, when the user clicks by, the web app logic the calls the MotoGP backend signing service.
+On the MotoGP website, when the user clicks buy, the web app logic the calls the MotoGP backend signing service.
 
 ### 2
 Using a private key, the backend signing service creates a signature which includes the user's address, a nonce unique to the address which is read from the SalesContract, and the pack type.
