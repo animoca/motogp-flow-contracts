@@ -1,5 +1,8 @@
 # The SalesContract
 
+This contract review request includes the SalesContract contract and related transactions used in the salesContract.test.js test suite.
+The other contracts in the projects are existing, already deployed contracts and one development debug contract - please exclude those in the review.
+
 ## Summary
 The SalesContract role is to enable on-chain sales of MotoGP packs.
 
@@ -43,3 +46,4 @@ The user's payment for packs comes from a Flow vault submitted in the buyPack tr
 ```
 yarn test salesContract
 ```
+Expected output is a list of passed tests.
