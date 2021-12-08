@@ -27,7 +27,7 @@ import MotoGPTransfer from 0xMotoGPTransfer
 pub contract SalesContract {
 
     pub fun getVersion(): String {
-        return "0.1.10"
+        return "1.0.0"
     }
 
 
