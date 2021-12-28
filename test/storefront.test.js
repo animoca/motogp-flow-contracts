@@ -428,11 +428,11 @@ describe("Tests for NFTStorefront.\n\n\tRunning tests:...", () => {
         const buyer = await getAccountAddress("Bob");
         const seller = await getAccountAddress("Alice");
 
-        const saleOfferCountBefore = await executeScript("get-sale-offer-ids-in-nftstorefront", [seller]); 
+        const saleOfferCountBefore = await executeScript("get-saleoffer-ids-in-nftstorefront", [seller]); 
         const tx = await sendTransaction("buy-pack-from-nftstorefront-with-flow-and-remove-saleoffer", [buyer], [flowTokenPackSaleOfferResourceID, seller]);
         expect(tx.status).toBe(TX_SUCCESS_STATUS);
 
-        const saleOfferCountAfter = await executeScript("get-sale-offer-ids-in-nftstorefront", [seller]);
+        const saleOfferCountAfter = await executeScript("get-saleoffer-ids-in-nftstorefront", [seller]);
         expect(saleOfferCountBefore.length - saleOfferCountAfter.length).toBe(1);
 
         // check that the saleOffer can't accessed
