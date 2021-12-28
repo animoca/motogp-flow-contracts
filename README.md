@@ -12,29 +12,30 @@ The reason for the changes is that we don't want the user to be able to determin
 To keep the contract implementation as close to the original storefront contract as possible for easier audit and testing, we've kept the contract's internal use of cuts for calculation commissions.
 
 # Contract:
-[+] NFTSTorefront
+* NFTSTorefront
 
 # Related transactions:
-[+] provision-nftstorefront
-[+] set-commission-rate-on-nftstorefront
-[+] list-pack-for-sale-for-revv-on-nftstorefront
-[+] list-card-for-sale-for-revv-on-nftstorefront
-[+] list-pack-for-sale-for-flow-on-nftstorefront
-[+] list-card-for-sale-for-flow-on-nftstorefront
-[+] buy-pack-from-nftstorefront-with-revv
-[+] buy-card-from-nftstorefront-with-revv
-[+] buy-card-from-nftstorefront-with-flow
-[+] buy-pack-from-nftstorefront-with-flow
-[+] buy-pack-from-nftstorefront-with-flow-and-remove-saleoffer
-[+] clean-up-saleoffer-from-nftstorefront
-[+] delist-from-nftstorefront
-[+] remove-provisioned-nft-storefront
+* provision-nftstorefront
+* set-commission-rate-on-nftstorefront
+* list-pack-for-sale-for-revv-on-nftstorefront
+* list-card-for-sale-for-revv-on-nftstorefront
+* list-pack-for-sale-for-flow-on-nftstorefront
+* list-card-for-sale-for-flow-on-nftstorefront
+* buy-pack-from-nftstorefront-with-revv
+* buy-card-from-nftstorefront-with-revv
+* buy-card-from-nftstorefront-with-flow
+* buy-pack-from-nftstorefront-with-flow
+* buy-pack-from-nftstorefront-with-flow-and-remove-saleoffer
+* clean-up-saleoffer-from-nftstorefront
+* delist-from-nftstorefront
+* remove-provisioned-nft-storefront
 
 # Related scripts
-[+] get-saleoffer-ids-in-nftstorefront
-[+] get-saleoffer-nftid-from-nftstorefront
-[+] is-revv-commission-receiver-set-on-nft-storefront
-[+] is-card-listed-on-storefront
-[+] get-saleoffer-price-from-storefront
-[+] get-card-ids-from-storefront
-[+] get-pack-ids-from-nftstorefront
+* get-saleoffer-ids-in-nftstorefront
+* get-saleoffer-nftid-from-nftstorefront
+* is-revv-commission-receiver-set-on-nft-storefront
+* is-card-listed-on-storefront
+* get-saleoffer-price-from-storefront
+* get-card-ids-from-storefront
+* get-pack-ids-from-nftstorefront
+
