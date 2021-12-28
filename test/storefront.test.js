@@ -4,8 +4,6 @@ import { emulator, init, deployContractByName, getAccountAddress, sendTransactio
 import { TX_SUCCESS_STATUS } from "./constants";
 import _ from "lodash";
 
-console.log("Running storefront.test.js");
-
 jest.setTimeout(1000000);
 
 describe("Tests for NFTStorefront.\n\n\tRunning tests:...", () => {
@@ -265,13 +263,10 @@ describe("Tests for NFTStorefront.\n\n\tRunning tests:...", () => {
         expect(tx.status).toBe(TX_SUCCESS_STATUS);
 
         let adminRevvBalanceAfter = parseFloat((await executeScript("get-revv-balance", [MotoGP])));
-        //console.log( { "adminDiff": adminRevvBalanceAfter - adminRevvBalanceBefore});
 
         let buyerRevvBalanceAfter = parseFloat((await executeScript("get-revv-balance", [buyer])));
-        //console.log( { "buyerDiff": buyerRevvBalanceBefore - buyerRevvBalanceAfter});
 
         let sellerRevvBalanceAfter = parseFloat((await executeScript("get-revv-balance", [seller])));
-        //console.log( { "sellerDiff": sellerRevvBalanceAfter - sellerRevvBalanceBefore});
 
         let adminDiff = (adminRevvBalanceAfter - adminRevvBalanceBefore).toFixed(2);
         let sellerDiff = (sellerRevvBalanceAfter - sellerRevvBalanceBefore).toFixed(2);
@@ -313,7 +308,6 @@ describe("Tests for NFTStorefront.\n\n\tRunning tests:...", () => {
         let alicesCards = await executeScript("get-owned-cards", [Alice]);
         let cardId = alicesCards[0];
         listedCardId = cardId;
-        console.log({ listedCardId });
         let price = 12.7;
 
         // list for sale
@@ -326,26 +320,23 @@ describe("Tests for NFTStorefront.\n\n\tRunning tests:...", () => {
     test("test that the is-listed script for cards work as expected", async () => {
         const Alice = await getAccountAddress("Alice");
         const result1 = await executeScript("is-card-listed-on-storefront", [Alice, listedCardId ]);
-        console.log("result:", result1);
         expect(result1).toBe(true);
 
         const unusedId = 1000;
         const result2 = await executeScript("is-card-listed-on-storefront", [Alice, unusedId ]);
-        console.log("result:", result2);
         expect(result2).toBe(false);
     });
 
     test("get all card ids from storefront", async () => {
         const Alice = await getAccountAddress("Alice");
-        console.log("get ids alice", Alice);
         let allCardIds = await executeScript("get-card-ids-from-nftstorefront", [Alice]);
-        console.log({ allCardIds });
+        expect(allCardIds.length).toBe(1);
     });
 
     test("get all pack ids from storefront", async () => {
         const Alice = await getAccountAddress("Alice");
         let allPackIds = await executeScript("get-pack-ids-from-nftstorefront", [Alice]);
-        console.log({ allPackIds });
+        expect(allPackIds.length).toBe(1);
     })
 
     test("Bob buys a card for FLOW", async () => {
@@ -390,7 +381,6 @@ describe("Tests for NFTStorefront.\n\n\tRunning tests:...", () => {
         let tx = await sendTransaction("list-card-for-sale-for-flow-on-nftstorefront", [Bob], [cardId, price]);     
         let data = tx.events[0].data;
         const saleOfferResourceID = data.saleOfferResourceID;
-        console.log({saleOfferResourceID});
         expect(tx.status).toBe(TX_SUCCESS_STATUS);
 
         // alice buys it
@@ -423,9 +413,7 @@ describe("Tests for NFTStorefront.\n\n\tRunning tests:...", () => {
         const Alice = await getAccountAddress("Alice")
         // get Bob's pack ids
         let alicesPacks = await executeScript("get-owned-packs", [Alice]);
-        console.log("PACK_IDS", alicesPacks);
         let packId = alicesPacks[0];
-        console.log("PACK-ID", packId)
         let price = '1.5';
 
         // list for sale
