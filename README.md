@@ -11,10 +11,12 @@ The NFTSTorefront contract in this repo has some changes vs the above reference.
 The reason for the changes is that we don't want the user to be able to determine the cuts when creating a SaleOffer transaction. For our marketplace, the cuts (= commissions) are determined by the contract, with a commission percentage going to MotoGP and the remainder to the NFT owner.
 To keep the contract implementation as close to the original storefront contract as possible for easier audit and testing, we've kept the contract's internal use of cuts for calculation commissions.
 
-# Contract:
-* NFTSTorefront
+# Contract
+path: ./cadence/contracts/
+* NFTStorefront
 
-# Related transactions:
+# Related transactions
+path: ./cadence/transactions/
 * provision-nftstorefront
 * set-commission-rate-on-nftstorefront
 * list-pack-for-sale-for-revv-on-nftstorefront
@@ -31,6 +33,7 @@ To keep the contract implementation as close to the original storefront contract
 * remove-provisioned-nft-storefront
 
 # Related scripts
+path: ./cadence/scripts/
 * get-saleoffer-ids-in-nftstorefront
 * get-saleoffer-nftid-from-nftstorefront
 * is-revv-commission-receiver-set-on-nft-storefront
