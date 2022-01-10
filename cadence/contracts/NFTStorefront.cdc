@@ -570,8 +570,8 @@ pub contract NFTStorefront {
     }
 
     init () {
-        self.StorefrontStoragePath = /storage/NFTStorefront
-        self.StorefrontPublicPath = /public/NFTStorefront
+        self.StorefrontStoragePath = /storage/MotoGPNFTStorefront
+        self.StorefrontPublicPath = /public/MotoGPNFTStorefront
 
         self.commissionRate = 0.05
         self.commissionReceiver = nil
