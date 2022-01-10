@@ -1,6 +1,6 @@
 import FungibleToken from 0xFungibleToken
 import NonFungibleToken from 0xNonFungibleToken
-import MotoGPAdmin from 0xMotoGPAdmin
+import MotoGPAdmin from 0xa49cc0ee46c54bfb
 
 // NFTStorefront
 //
