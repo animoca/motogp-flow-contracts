@@ -44,3 +44,8 @@ path: ./cadence/scripts/
 * get-card-ids-from-storefront
 * get-pack-ids-from-nftstorefront
 
+# Run Tests
+
+```
+yarn run storefront
+```
