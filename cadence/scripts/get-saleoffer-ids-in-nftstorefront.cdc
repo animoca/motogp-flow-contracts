@@ -1,8 +1,8 @@
-import NFTStorefront from 0xNFTStorefront
+import MotoGPNFTStorefront from 0xMotoGPNFTStorefront
 
 pub fun main(address: Address): [UInt64] {
-    let storefrontRef = getAccount(address).getCapability<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(
-            NFTStorefront.StorefrontPublicPath
+    let storefrontRef = getAccount(address).getCapability<&MotoGPNFTStorefront.Storefront{MotoGPNFTStorefront.StorefrontPublic}>(
+            MotoGPNFTStorefront.StorefrontPublicPath
         )
         .borrow()
         ?? panic("Could not borrow public storefront from address")

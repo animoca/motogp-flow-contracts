@@ -2,12 +2,12 @@ import FungibleToken from 0xFungibleToken
 import NonFungibleToken from 0xNonFungibleToken
 import FlowToken from 0xFlowToken
 import MotoGPCard from 0xMotoGPCard
-import NFTStorefront from 0xNFTStorefront
+import MotoGPNFTStorefront from 0xMotoGPNFTStorefront
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64) {
     let flowTokenReceiver:Capability<&FlowToken.Vault{FungibleToken.Receiver}>
     let cardProvider: Capability<&MotoGPCard.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-    let storefront: &NFTStorefront.Storefront
+    let storefront: &MotoGPNFTStorefront.Storefront
 
     prepare(account: AuthAccount) {
         
@@ -24,7 +24,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64) {
 
         assert(self.cardProvider.borrow() != nil, message: "Missing card Provider")
 
-        self.storefront = account.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
+        self.storefront = account.borrow<&MotoGPNFTStorefront.Storefront>(from: MotoGPNFTStorefront.StorefrontStoragePath)
         ?? panic("Missing NFTStorefront Storefront")
         
     }

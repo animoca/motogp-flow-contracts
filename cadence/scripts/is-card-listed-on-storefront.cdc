@@ -1,12 +1,12 @@
 import MotoGPCard from 0xMotoGPCard
-import NFTStorefront from 0xNFTStorefront
+import MotoGPNFTStorefront from 0xMotoGPNFTStorefront
 
 pub fun main(address: Address, nftID: UInt64): Bool {
     
     let nftType = Type<@MotoGPCard.NFT>()
     
     let storefrontRef = getAccount(address)
-    .getCapability<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(NFTStorefront.StorefrontPublicPath)
+    .getCapability<&MotoGPNFTStorefront.Storefront{MotoGPNFTStorefront.StorefrontPublic}>(MotoGPNFTStorefront.StorefrontPublicPath)
     .borrow() ?? panic("Could not borrow public storefront from address")
     
     let saleOfferIds = storefrontRef.getSaleOfferIDs()

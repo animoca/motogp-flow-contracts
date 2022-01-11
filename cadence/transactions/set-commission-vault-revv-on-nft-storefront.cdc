@@ -1,4 +1,4 @@
-import NFTStorefront from 0xNFTStorefront
+import MotoGPNFTStorefront from 0xMotoGPNFTStorefront
 import REVV from 0xREVV
 import FungibleToken from 0xFungibleToken
 import MotoGPAdmin from 0xMotoGPAdmin
@@ -28,7 +28,7 @@ transaction {
     }
 
     execute {
-       NFTStorefront.setCommissionReceiver(adminRef: self.adminRef, vaultType: Type<@REVV.Vault>(), commissionReceiver: self.revvReceiverCap)
-       NFTStorefront.setCommissionReceiver(adminRef: self.adminRef, vaultType: Type<@FlowToken.Vault>(), commissionReceiver: self.flowTokenReceiverCap)
+       MotoGPNFTStorefront.setCommissionReceiver(adminRef: self.adminRef, vaultType: Type<@REVV.Vault>(), commissionReceiver: self.revvReceiverCap)
+       MotoGPNFTStorefront.setCommissionReceiver(adminRef: self.adminRef, vaultType: Type<@FlowToken.Vault>(), commissionReceiver: self.flowTokenReceiverCap)
     }
 }

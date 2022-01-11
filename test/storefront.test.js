@@ -6,7 +6,7 @@ import _ from "lodash";
 
 jest.setTimeout(1000000);
 
-describe("Tests for NFTStorefront.\n\n\tRunning tests:...", () => {
+describe("Tests for MotoGPNFTStorefront.\n\n\tRunning tests:...", () => {
 
     let addressMap = {};
     const serviceAddress = "0xf8d6e0586b0a20c7" //values from emulator
@@ -55,7 +55,7 @@ describe("Tests for NFTStorefront.\n\n\tRunning tests:...", () => {
     test("Deploy Debug", async () => await deployContract({ contractName: "Debug", accountName: "MotoGP"}));
     test("Deploy MotoGPTransfer", async () => await deployContract({ contractName: "MotoGPTransfer", accountName: "MotoGP"}));
     test("Deploy REVV", async () => await deployContract({ contractName: "REVV", accountName: "MotoGP"}));
-    test("Deploy NFTStorefront", async () => await deployContract({ contractName: "NFTStorefront", accountName: "MotoGP"}));
+    test("Deploy MotoGPNFTStorefront", async () => await deployContract({ contractName: "MotoGPNFTStorefront", accountName: "MotoGP"}));
 
     test("Set revv commission receiver on Storefront contract", async () => {
 

@@ -1,12 +1,12 @@
-# NFTStorefront contract
+# MotoGPNFTStorefront contract
 
-This contract review request includes the NFTSTorefront contract and related transactions used in the storefront.test.js test suite.
+This contract review request includes the MotoGPNFTStorefront contract and related transactions used in the storefront.test.js test suite.
 
 The other contracts in the project are already deployed, and one development debug contract - please exclude those in the review.
 
 # Summary
-The NFTStorefront contract is based on the contract with same name developed by Dapper Labs: https://github.com/onflow/nft-storefront
-The NFTSTorefront contract in this repo has some changes vs the above reference. It includes a commission rate set at contract level, and removes the cuts from the createSaleoffer method. 
+The MotoGPNFTStorefront contract is based on the NFTSTorefront contract by Dapper Labs: https://github.com/onflow/nft-storefront
+The MotoGPNFTSTorefront contract in this repo has some changes vs the above reference. It includes a commission rate set at contract level, and removes the cuts from the createSaleoffer method. 
 
 The reason for the changes is that we don't want the user to be able to determine the cuts when creating a SaleOffer transaction. For our marketplace, the cuts (= commissions) are determined by the contract, with a commission percentage going to MotoGP and the remainder to the NFT owner.
 To keep the contract implementation as close to the original storefront contract as possible for easier audit and testing, we've kept the contract's internal use of cuts for calculation commissions.
@@ -15,7 +15,7 @@ We also added some fields to the SaleOffer events. These new fields will be used
 
 # Contract
 path: ./cadence/contracts/
-* NFTStorefront
+* MotoGPNFTStorefront
 
 # Related transactions
 path: ./cadence/transactions/

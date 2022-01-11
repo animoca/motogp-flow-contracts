@@ -1,11 +1,11 @@
-import NFTStorefront from 0xNFTStorefront
+import MotoGPNFTStorefront from 0xMotoGPNFTStorefront
 
 transaction(saleOfferResourceID: UInt64) {
-    let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontManager}
+    let storefront: &MotoGPNFTStorefront.Storefront{MotoGPNFTStorefront.StorefrontManager}
 
     prepare(acct: AuthAccount) {
-        self.storefront = acct.borrow<&NFTStorefront.Storefront{NFTStorefront.StorefrontManager}>(from: NFTStorefront.StorefrontStoragePath)
-            ?? panic("Missing or mis-typed NFTStorefront.Storefront")
+        self.storefront = acct.borrow<&MotoGPNFTStorefront.Storefront{MotoGPNFTStorefront.StorefrontManager}>(from: MotoGPNFTStorefront.StorefrontStoragePath)
+            ?? panic("Missing or mis-typed MotoGPNFTStorefront.Storefront")
     }
 
     execute {

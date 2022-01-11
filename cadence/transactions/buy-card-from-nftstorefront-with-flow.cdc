@@ -2,19 +2,19 @@ import FungibleToken from 0xFungibleToken
 import NonFungibleToken from 0xNonFungibleToken
 import FlowToken from 0xFlowToken
 import MotoGPCard from 0xMotoGPCard
-import NFTStorefront from 0xNFTStorefront
+import MotoGPNFTStorefront from 0xMotoGPNFTStorefront
 import Debug from 0xDebug
 
 transaction(saleOfferResourceID: UInt64, storefrontAddress: Address) {
     let paymentVault: @FungibleToken.Vault
     let cardCollection: &MotoGPCard.Collection{NonFungibleToken.CollectionPublic}
-    let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}
-    let saleOffer: &NFTStorefront.SaleOffer{NFTStorefront.SaleOfferPublic}
+    let storefront: &MotoGPNFTStorefront.Storefront{MotoGPNFTStorefront.StorefrontPublic}
+    let saleOffer: &MotoGPNFTStorefront.SaleOffer{MotoGPNFTStorefront.SaleOfferPublic}
 
     prepare(acct: AuthAccount) {
 
         self.storefront = getAccount(storefrontAddress)
-        .getCapability<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(NFTStorefront.StorefrontPublicPath)!.borrow()
+        .getCapability<&MotoGPNFTStorefront.Storefront{MotoGPNFTStorefront.StorefrontPublic}>(MotoGPNFTStorefront.StorefrontPublicPath)!.borrow()
         ?? panic("Could not borrow Storefront from provided address")
 
         self.saleOffer = self.storefront.borrowSaleOffer(saleOfferResourceID: saleOfferResourceID) ?? panic("No Offer with that ID in Storefront")

@@ -2,12 +2,12 @@ import FungibleToken from 0xFungibleToken
 import NonFungibleToken from 0xNonFungibleToken
 import REVV from 0xREVV
 import MotoGPPack from 0xMotoGPPack
-import NFTStorefront from 0xNFTStorefront
+import MotoGPNFTStorefront from 0xMotoGPNFTStorefront
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64) {
     let revvReceiver:Capability<&REVV.Vault{FungibleToken.Receiver}>
     let packProvider: Capability<&MotoGPPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-    let storefront: &NFTStorefront.Storefront
+    let storefront: &MotoGPNFTStorefront.Storefront
 
     prepare(account: AuthAccount) {
         self.revvReceiver = account.getCapability<&REVV.Vault{FungibleToken.Receiver}>(REVV.RevvReceiverPublicPath)!
@@ -22,7 +22,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64) {
         self.packProvider = account.getCapability<&MotoGPPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(packCollectionProviderPrivatePath)!
         assert(self.packProvider.borrow() != nil, message: "Missing Pack Provider")
 
-        self.storefront = account.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
+        self.storefront = account.borrow<&MotoGPNFTStorefront.Storefront>(from: MotoGPNFTStorefront.StorefrontStoragePath)
         ?? panic("Missing NFTStorefront Storefront")
     }
 

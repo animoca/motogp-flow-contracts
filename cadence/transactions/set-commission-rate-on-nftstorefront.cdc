@@ -1,4 +1,4 @@
-import NFTStorefront from 0xNFTStorefront
+import MotoGPNFTStorefront from 0xMotoGPNFTStorefront
 import MotoGPAdmin from 0xMotoGPAdmin
 
 transaction(commissionRate: UFix64) {
@@ -7,6 +7,6 @@ transaction(commissionRate: UFix64) {
         self.adminRef = acct.borrow<&MotoGPAdmin.Admin>(from: /storage/motogpAdmin)!
     }
     execute{
-        NFTStorefront.setCommissionRate(adminRef: self.adminRef, commissionRate: commissionRate)
+        MotoGPNFTStorefront.setCommissionRate(adminRef: self.adminRef, commissionRate: commissionRate)
     }
 }

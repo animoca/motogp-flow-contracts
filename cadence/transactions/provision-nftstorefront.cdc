@@ -1,4 +1,4 @@
-import NFTStorefront from 0xNFTStorefront
+import MotoGPNFTStorefront from 0xMotoGPNFTStorefront
 
 // This transaction installs the Storefront resource in an account.
 
@@ -9,16 +9,16 @@ transaction {
     prepare(acct: AuthAccount) {
 
         // If the account doesn't already have a Storefront
-        if acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath) == nil {
+        if acct.borrow<&MotoGPNFTStorefront.Storefront>(from: MotoGPNFTStorefront.StorefrontStoragePath) == nil {
 
             // Create a new empty storefront
-            let storefront <- NFTStorefront.createStorefront() as! @NFTStorefront.Storefront
+            let storefront <- MotoGPNFTStorefront.createStorefront() as! @MotoGPNFTStorefront.Storefront
             
             // Save it to the account
-            acct.save(<-storefront, to: NFTStorefront.StorefrontStoragePath)
+            acct.save(<-storefront, to: MotoGPNFTStorefront.StorefrontStoragePath)
 
             // Create a public capability for the storefront
-            acct.link<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(NFTStorefront.StorefrontPublicPath, target: NFTStorefront.StorefrontStoragePath)
+            acct.link<&MotoGPNFTStorefront.Storefront{MotoGPNFTStorefront.StorefrontPublic}>(MotoGPNFTStorefront.StorefrontPublicPath, target: MotoGPNFTStorefront.StorefrontStoragePath)
         }
     }
 }

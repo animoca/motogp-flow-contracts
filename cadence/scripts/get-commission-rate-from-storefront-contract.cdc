@@ -1,5 +1,5 @@
-import NFTStorefront from 0xNFTStorefront
+import MotoGPNFTStorefront from 0xMotoGPNFTStorefront
 
 pub fun main(): UFix64 {
-    return NFTStorefront.getCommissionRate()
+    return MotoGPNFTStorefront.getCommissionRate()
 }

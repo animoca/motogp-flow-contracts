@@ -2,7 +2,7 @@ import FungibleToken from 0xFungibleToken
 import NonFungibleToken from 0xNonFungibleToken
 import MotoGPAdmin from 0xMotoGPAdmin
 
-// NFTStorefront
+// MotoGPStorefront
 //
 // A general purpose sale support contract for Flow NonFungibleTokens.
 // 
@@ -19,7 +19,7 @@ import MotoGPAdmin from 0xMotoGPAdmin
 // Marketplaces and other aggregators can watch for SaleOffer events
 // and list items of interest.
 //
-pub contract NFTStorefront {
+pub contract MotoGPNFTStorefront {
 
     pub fun getVersion():String {
        return "1.0.0"
@@ -360,13 +360,13 @@ pub contract NFTStorefront {
             storefrontID: UInt64
         ) {
             pre {
-                NFTStorefront.commissionReceiver !=  nil : "NFTStorefront.commissionReceiver is null"
+                MotoGPNFTStorefront.commissionReceiver !=  nil : "MotoGPNFTStorefront.commissionReceiver is null"
             }
 
-            let commissionAmount = price * NFTStorefront.commissionRate
-            let sellerPayoutAmount = price * (1.0 - NFTStorefront.commissionRate)
+            let commissionAmount = price * MotoGPNFTStorefront.commissionRate
+            let sellerPayoutAmount = price * (1.0 - MotoGPNFTStorefront.commissionRate)
 
-            let commissionReceiver = NFTStorefront.commissionReceiverMap[salePaymentVaultType.identifier] ?? panic("no receiver found for vault type")
+            let commissionReceiver = MotoGPNFTStorefront.commissionReceiverMap[salePaymentVaultType.identifier] ?? panic("no receiver found for vault type")
 
             let commissionCut = SaleCut(receiver: commissionReceiver, amount: commissionAmount)
             let sellerPayoutCut = SaleCut(receiver: sellerReceiver, amount: sellerPayoutAmount)
