@@ -22,7 +22,7 @@ import MotoGPAdmin from 0xa49cc0ee46c54bfb
 pub contract MotoGPNFTStorefront {
 
     pub fun getVersion():String {
-       return "1.0.0"
+       return "1.0.1"
     }
     // NFTStorefrontInitialized
     // This contract has been deployed.
