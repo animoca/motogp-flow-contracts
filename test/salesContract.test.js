@@ -1,10 +1,22 @@
 import { expect } from "@jest/globals";
 import path from "path";
-import { emulator, init, deployContractByName, getAccountAddress, sendTransaction, executeScript, getFlowBalance } from "flow-js-testing";
+import { emulator, init, deployContractByName as _deployContractByName, getAccountAddress, sendTransaction as _sendTransaction, executeScript as _executeScript, getFlowBalance } from "flow-js-testing";
 import { TX_SUCCESS_STATUS } from "./constants";
 import _ from "lodash";
 import { SHA3 } from 'sha3';
 import { ec as EC } from "elliptic";
+
+const compatFn = (fn) => {
+    return async (...args) => {
+        const [result, err] = await fn(...args);
+        if (err) throw err;
+        return result;
+    };
+};
+
+const deployContractByName = compatFn(_deployContractByName);
+const sendTransaction = compatFn(_sendTransaction);
+const executeScript = compatFn(_executeScript);
 
 jest.setTimeout(10000000);
 
@@ -366,32 +378,6 @@ describe("SalesContract tests.\n\n\tRunning tests:...", () => {
         expect(tx.status).toBe(TX_SUCCESS_STATUS);
         let allSkuNamesAfter  = await executeScript("get-all-sku-names-in-sales-contract");
         expect(allSkuNamesBefore.length - allSkuNamesAfter.length).toBe(1)
-    });
-
-    test("test padding logic", async () => {
-        let ADDRESS_0 = "0x252c7419f2282991";
-        let padded0 = await executeScript("test-address-padding",[ADDRESS_0]);
-        expect(padded0).toBe(ADDRESS_0);
-
-        let ADDRESS_1 = "0x052c7419f2282991";
-        let padded1 = await executeScript("test-address-padding",[ADDRESS_1]);
-        expect(padded1).toBe(ADDRESS_1);
-
-        let ADDRESS_2 = "0x002c7419f2282991";
-        let padded2 = await executeScript("test-address-padding",[ADDRESS_2]);
-        expect(padded2).toBe(ADDRESS_2);
-
-        let ADDRESS_3 = "0x000c7419f2282991";
-        let padded3 = await executeScript("test-address-padding",[ADDRESS_3]);
-        expect(padded3).toBe(ADDRESS_3);
-
-        let ADDRESS_4 = "0x00007419f2282991";
-        let padded4 = await executeScript("test-address-padding",[ADDRESS_4]);
-        expect(padded4).toBe(ADDRESS_4);
-
-        let ADDRESS_5 = "0x00000419f2282991"
-        let padded5 = await executeScript("test-address-padding",[ADDRESS_5]);
-        expect(padded5).toBe(ADDRESS_5);
     });
 
     test("can change starttime timestamp on sku", async () => {
