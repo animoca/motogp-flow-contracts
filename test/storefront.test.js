@@ -1,8 +1,20 @@
 import { expect } from "@jest/globals";
 import path from "path";
-import { emulator, init, deployContractByName, getAccountAddress, sendTransaction, executeScript, mintFlow, getFlowBalance } from "flow-js-testing";
+import { emulator, init, deployContractByName as _deployContractByName, getAccountAddress, sendTransaction as _sendTransaction, executeScript as _executeScript, mintFlow, getFlowBalance } from "flow-js-testing";
 import { TX_SUCCESS_STATUS } from "./constants";
 import _ from "lodash";
+
+const compatFn = (fn) => {
+    return async (...args) => {
+        const [result, err] = await fn(...args);
+        if (err) throw err;
+        return result;
+    };
+};
+
+const deployContractByName = compatFn(_deployContractByName);
+const sendTransaction = compatFn(_sendTransaction);
+const executeScript = compatFn(_executeScript);
 
 jest.setTimeout(1000000);
 
@@ -17,7 +29,7 @@ describe("Tests for MotoGPNFTStorefront.\n\n\tRunning tests:...", () => {
     beforeAll(async () => {
         const basePath = path.resolve(__dirname, "../cadence");
         const port = 8080;
-        init(basePath, port);
+        await init(basePath, { port });
         await emulator.start(port);    
     });
 

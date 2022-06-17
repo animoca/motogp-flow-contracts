@@ -1,6 +1,6 @@
-import FungibleToken from 0xf233dcee88fe0abe
-import NonFungibleToken from 0x1d7e57aa55817448
-import MotoGPAdmin from 0xa49cc0ee46c54bfb
+import FungibleToken from 0xFungibleToken
+import NonFungibleToken from 0xNonFungibleToken
+import MotoGPAdmin from 0xMotoGPAdmin
 
 // MotoGPStorefront
 //
@@ -22,7 +22,7 @@ import MotoGPAdmin from 0xa49cc0ee46c54bfb
 pub contract MotoGPNFTStorefront {
 
     pub fun getVersion():String {
-       return "1.0.1"
+       return "1.1.0"
     }
     // NFTStorefrontInitialized
     // This contract has been deployed.
@@ -55,7 +55,7 @@ pub contract MotoGPNFTStorefront {
     // A sale offer has been created and added to a Storefront resource.
     // The Address values here are valid when the event is emitted, but
     // the state of the accounts they refer to may be changed outside of the
-    // NFTStorefront workflow, so be careful to check when using them.
+    // MotoGPNFTStorefront workflow, so be careful to check when using them.
     //
     pub event SaleOfferAvailable(
         storefrontAddress: Address,
@@ -97,7 +97,7 @@ pub contract MotoGPNFTStorefront {
     // The cut MotoGP takes from the seller's selling price. If set to 0.05, MotoGP takes 5%
     access(contract) var commissionRate: UFix64
 
-    // commissionReceiver
+    // DEPRECATED: commissionReceiver
     // The Vault where MotoGP's commission should be deposited
     access(contract) var commissionReceiver: Capability<&{FungibleToken.Receiver}>?
 
@@ -359,10 +359,6 @@ pub contract MotoGPNFTStorefront {
             sellerReceiver: Capability<&{FungibleToken.Receiver}>, //for the seller to receive her payout
             storefrontID: UInt64
         ) {
-            pre {
-                MotoGPNFTStorefront.commissionReceiver !=  nil : "MotoGPNFTStorefront.commissionReceiver is null"
-            }
-
             let commissionAmount = price * MotoGPNFTStorefront.commissionRate
             let sellerPayoutAmount = price * (1.0 - MotoGPNFTStorefront.commissionRate)
 
@@ -502,7 +498,7 @@ pub contract MotoGPNFTStorefront {
         //
         pub fun borrowSaleOffer(saleOfferResourceID: UInt64): &SaleOffer{SaleOfferPublic}? {
             if self.saleOffers[saleOfferResourceID] != nil {
-                return &self.saleOffers[saleOfferResourceID] as! &SaleOffer{SaleOfferPublic}
+                return &self.saleOffers[saleOfferResourceID] as &SaleOffer{SaleOfferPublic}?
             } else {
                 return nil
             }
@@ -565,7 +561,6 @@ pub contract MotoGPNFTStorefront {
             adminRef != nil : "adminRef is nil"
             commissionReceiver.borrow() != nil : "commissionReceiver is nil"
         }
-        self.commissionReceiver = commissionReceiver
         self.commissionReceiverMap[vaultType.identifier] = commissionReceiver
     }
 
@@ -573,8 +568,8 @@ pub contract MotoGPNFTStorefront {
         self.StorefrontStoragePath = /storage/MotoGPNFTStorefront
         self.StorefrontPublicPath = /public/MotoGPNFTStorefront
 
-        self.commissionRate = 0.05
         self.commissionReceiver = nil
+        self.commissionRate = 0.05
         self.commissionReceiverMap = {}
 
         emit NFTStorefrontInitialized()

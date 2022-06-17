@@ -3,7 +3,7 @@ import MotoGPPack from 0xMotoGPPack
 pub contract MotoGPAdmin{
 
     pub fun getVersion(): String {
-        return "0.7.8"
+        return "1.0.0"
     }
     
     // Admin
@@ -21,12 +21,7 @@ pub contract MotoGPAdmin{
         // is opened.
         //
         pub fun addPackType(packType: UInt64, numberOfCards: UInt64) {
-            pre {
-                MotoGPPack.packTypes[packType] == nil:
-                    "This pack type already exists!"
-            }
-            // Adds this pack type
-            MotoGPPack.packTypes[packType] = MotoGPPack.PackType(_packType: packType, _numberOfCards: numberOfCards)
+            MotoGPPack.addPackType(packType: packType, numberOfCards: numberOfCards)
         }
 
         // mintPacks

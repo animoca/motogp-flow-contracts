@@ -6,7 +6,7 @@ import MotoGPCounter from 0xMotoGPCounter
 pub contract MotoGPCard: NonFungibleToken {
 
     pub fun getVersion(): String {
-        return "0.7.8"
+        return "1.0.0"
     }
 
     // The total number of Cards in existence
@@ -206,7 +206,7 @@ pub contract MotoGPCard: NonFungibleToken {
         // so that the caller can read its id field
         //
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
-            return &self.ownedNFTs[id] as &NonFungibleToken.NFT
+            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
 
         // borrowCard
@@ -215,12 +215,8 @@ pub contract MotoGPCard: NonFungibleToken {
         // They can use this to read its id, cardID, and serial
         //
         pub fun borrowCard(id: UInt64): &MotoGPCard.NFT? {
-            if self.ownedNFTs[id] != nil {
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &MotoGPCard.NFT
-            } else {
-                return nil
-            }
+            let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            return ref as! &MotoGPCard.NFT?
         }
 
         destroy() {

@@ -3,7 +3,7 @@ import NonFungibleToken from 0xNonFungibleToken
 pub contract MotoGPPack: NonFungibleToken {
 
     pub fun getVersion(): String {
-        return "0.7.8"
+        return "1.0.0"
     }
 
     // The total number of Packs that have been minted
@@ -76,7 +76,7 @@ pub contract MotoGPPack: NonFungibleToken {
         pub var packInfo: PackInfo
 
         init(_packNumber: UInt64, _packType: UInt64) {
-            let packTypeStruct: &PackType = &MotoGPPack.packTypes[_packType] as &PackType
+            let packTypeStruct: &PackType = (&MotoGPPack.packTypes[_packType] as &PackType?)!
             // updates the number of packs minted for this packType
             packTypeStruct.updateNumberOfPacksMinted()
             
@@ -240,7 +240,7 @@ pub contract MotoGPPack: NonFungibleToken {
         // so that the caller can read its id
         //
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
-            return &self.ownedNFTs[id] as &NonFungibleToken.NFT
+            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
 
         // borrowPack
@@ -249,12 +249,8 @@ pub contract MotoGPPack: NonFungibleToken {
         // They can use this to read its PackInfo and id
         //
         pub fun borrowPack(id: UInt64): &MotoGPPack.NFT? {
-            if self.ownedNFTs[id] != nil {
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &MotoGPPack.NFT
-            } else {
-                return nil
-            }
+            let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            return ref as! &MotoGPPack.NFT?
         }
 
         destroy() {
@@ -280,6 +276,20 @@ pub contract MotoGPPack: NonFungibleToken {
     //
     pub fun getPackTypeInfo(packType: UInt64): PackType {
         return self.packTypes[packType] ?? panic("This pack type does not exist")
+    }
+
+    // addPackType
+    // allows us to add new pack types from another contract
+    // in this account. This is helpful for 
+    // allowing MotoGPAdmin to add new pack types.
+    //
+    access(account) fun addPackType(packType: UInt64, numberOfCards: UInt64) {
+        pre {
+            self.packTypes[packType] == nil:
+                "This pack type already exists!"
+        }
+        // Adds this pack type
+        self.packTypes[packType] = self.PackType(_packType: packType, _numberOfCards: numberOfCards)
     }
 
     init() {
