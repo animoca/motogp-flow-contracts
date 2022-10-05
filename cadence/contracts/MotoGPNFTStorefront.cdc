@@ -552,6 +552,7 @@ pub contract MotoGPNFTStorefront {
     pub fun setCommissionRate(adminRef: &MotoGPAdmin.Admin, commissionRate: UFix64){
         pre {
             adminRef != nil : "adminRef is nil"
+            commissionRate >= 0.0 && commissionRate <= 1.0 : "Commission rate is outside of allowed range"
         }
         self.commissionRate = commissionRate
     }
