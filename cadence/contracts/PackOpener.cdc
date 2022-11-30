@@ -14,7 +14,7 @@ import ContractVersion from 0xContractVersion
 pub contract PackOpener: ContractVersion {
 
     pub fun getVersion(): String {
-        return "0.7.9"
+        return "1.0.0"
     }
 
     pub event Withdraw(id: UInt64, from: Address?)
@@ -87,8 +87,7 @@ pub contract PackOpener: ContractVersion {
         }
 
         pub fun borrowPack(id: UInt64): &MotoGPPack.NFT? {
-            let packRef = &self.packMap[id] as &MotoGPPack.NFT
-            return packRef
+            return &self.packMap[id] as &MotoGPPack.NFT?
         }
 
         init(_cardCollectionCap: Capability<&MotoGPCard.Collection{MotoGPCard.ICardCollectionPublic}>){

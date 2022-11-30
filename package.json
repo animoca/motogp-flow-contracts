@@ -26,7 +26,7 @@
     "bits.js": "^0.1.1",
     "bn": "^1.0.5",
     "elliptic": "^6.5.4",
-    "flow-js-testing": "^0.1.13",
+    "flow-js-testing": "^0.2.3-alpha.5",
     "jest": "^27.1.1",
     "lodash": "^4.17.21",
     "nft.storage": "^4.0.0",

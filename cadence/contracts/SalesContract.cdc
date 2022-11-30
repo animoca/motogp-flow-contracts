@@ -127,6 +127,18 @@ pub contract SalesContract {
                 index = index + UInt64(1)
             }
         }
+
+        access(contract) fun removeSerial(at: Int): UInt64? {
+            pre {
+                at < self.serialList.length:
+                    "Index out of bounds"
+            }
+            return self.serialList.remove(at: at)
+        }
+
+        access(contract) fun setBuyerCount(buyer: Address, count: UInt64) {
+            self.buyerCountMap[buyer] = count
+        }
     }
 
     // isCurrencySKU returns true if a SKU's startTime is in the past and it's endTime in the future, based on getCurrentBlock's timestamp.
@@ -248,32 +260,6 @@ pub contract SalesContract {
             return false
     }
 
-    // Helper method to convert address to String (used for verificaton of signature in buyPack)
-    // public to allow testing
-
-    pub fun convertAddressToString(address: Address): String {
-        let EXPECTED_ADDRESS_LENGTH = 18
-        var addrStr = address.toString() //Cadence shortens addresses starting with 0, so 0x0123 becomes 0x123
-        if addrStr.length == EXPECTED_ADDRESS_LENGTH {
-            return addrStr
-        }
-        let prefix = addrStr.slice(from: 0, upTo: 2)
-        var suffix = addrStr.slice(from: 2, upTo: addrStr.length)
-        
-        let steps = EXPECTED_ADDRESS_LENGTH - addrStr.length
-        var index = 0
-        while index < steps {
-            suffix = "0".concat(suffix) 
-            index = index + 1
-        }
-        
-        addrStr = prefix.concat(suffix)
-        if addrStr.length != EXPECTED_ADDRESS_LENGTH {
-            panic("Padding address String is wrong length")
-        }
-        return addrStr
-    }
-
     pub fun buyPack(signature: String, 
                     nonce: UInt32, 
                     packType: UInt64, 
@@ -299,7 +285,7 @@ pub contract SalesContract {
 
         let sku = self.skuMap[skuName]!
 
-        let recipientStr = self.convertAddressToString(address: recipient)
+        let recipientStr = recipient.toString()
 
         let message = skuName.concat(recipientStr).concat(nonce.toString()).concat(packType.toString());
         let isValid = self.isValidSignature(signature: signature, message: message)
@@ -313,9 +299,13 @@ pub contract SalesContract {
 
         // Get recipient vault and deposit payment
         let payoutRecipient = getAccount(sku.payoutAddress)
-        let payoutReceiver = payoutRecipient.getCapability(/public/flowTokenReceiver)
-                            .borrow<&FlowToken.Vault{FungibleToken.Receiver}>()
-                            ?? panic("Could not borrow a reference to the payout receiver")
+        let payoutRecipientCap = payoutRecipient.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+
+        assert(
+            payoutRecipientCap.check(),
+            message: "Could not borrow a reference to the payout receiver")
+
+        let payoutReceiver = payoutRecipientCap.borrow()!
         payoutReceiver.deposit(from: <-vault)
 
         // Check nonce for account isn't reused, and increment it
@@ -341,7 +331,7 @@ pub contract SalesContract {
 
         // **Remove** the selected packNumber from the packNumber list.
         // By removing the item, we ensure that even if same index is selected again in next tx, it will refer to another item.
-        let packNumber = sku.serialList.remove(at: index);
+        let packNumber = sku.removeSerial(at: Int(index))!
 
         // Mint a pack
         let nft <- MotoGPPack.createPack(packNumber: packNumber, packType: packType);
@@ -350,10 +340,10 @@ pub contract SalesContract {
        
         if sku.buyerCountMap.containsKey(recipient) {
             let oldCount = sku.buyerCountMap[recipient]!
-            sku.buyerCountMap[recipient] = UInt64(oldCount) + UInt64(1)
+            sku.setBuyerCount(buyer: recipient, count: oldCount + 1)
             self.skuMap[skuName] = sku
         } else {
-            sku.buyerCountMap[recipient] = UInt64(1)
+            sku.setBuyerCount(buyer: recipient, count: 1)
             self.skuMap[skuName] = sku
         }
 
